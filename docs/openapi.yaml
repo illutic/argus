@@ -1,0 +1,138 @@
+openapi: 3.0.3
+info:
+  title: Argus Smart Monitoring Service API
+  description: >
+    Argus is an automated alert aggregator and triage service: triggers (webhook/cron/Slack)
+    fan out to concurrent data-fetching from telemetry providers (Humio/Sentry/Firebase),
+    GitHub, LaunchDarkly, and Jira, synthesized by a local LLM (Ollama) and dispatched to Slack.
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns HTTP 200 if the Argus service is healthy and running.
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service is healthy
+
+  /triggers/webhook:
+    post:
+      summary: Ingest Webhook Alert
+      description: Ingests an incoming alert payload from an external monitoring system.
+      operationId: triggerWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RawAlert'
+            example:
+              teamId: "example-team"
+              source: "sentry"
+              title: "UnhandledException in PaymentGateway"
+              payload: '{"exception": "TimeoutException"}'
+      responses:
+        "202":
+          description: Alert accepted for asynchronous triage
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alertId:
+                    type: string
+                    example: "550e8400-e29b-41d4-a716-446655440000"
+        "400":
+          description: Invalid alert payload
+
+  /triggers/slack:
+    post:
+      summary: Ingest Slack Trigger
+      description: Ingests a trigger initiated via a Slack slash command or shortcut.
+      operationId: triggerSlack
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - teamId
+                - command
+              properties:
+                teamId:
+                  type: string
+                  example: "example-team"
+                command:
+                  type: string
+                  example: "/triage"
+                text:
+                  type: string
+                  example: "investigate checkout latency spikes"
+      responses:
+        "202":
+          description: Slack trigger accepted for triage
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  alertId:
+                    type: string
+                    example: "550e8400-e29b-41d4-a716-446655440000"
+        "400":
+          description: Invalid request
+
+components:
+  schemas:
+    RawAlert:
+      type: object
+      required:
+        - teamId
+        - source
+        - title
+      properties:
+        id:
+          type: string
+          description: Unique alert identifier
+        teamId:
+          type: string
+          description: Target team configuration key
+        source:
+          type: string
+          description: Source telemetry or monitoring provider
+        title:
+          type: string
+          description: Summary or exception title of the alert
+        payload:
+          type: string
+          description: Serialized raw event payload
+
+    AlertSeverity:
+      type: string
+      enum:
+        - INFO
+        - WARNING
+        - CRITICAL
+
+    AlertDecision:
+      type: object
+      required:
+        - teamId
+        - severity
+        - summary
+        - sourceSampleCount
+      properties:
+        teamId:
+          type: string
+        severity:
+          $ref: '#/components/schemas/AlertSeverity'
+        summary:
+          type: string
+        sourceSampleCount:
+          type: integer

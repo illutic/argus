@@ -1,0 +1,7 @@
+teamId: bad-provider-team
+jiraPrefix: BAD
+slackChannelId: C0000000001
+repoLayers:
+  - backend
+telemetry:
+  - not-a-registered-provider

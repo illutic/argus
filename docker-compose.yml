@@ -1,0 +1,49 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: argus-app
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      PORT: 8080
+      ARGUS_DB_PATH: /data/argus.db
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-gpt-oss:20b}
+      SLACK_BOT_TOKEN: ${SLACK_BOT_TOKEN:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      LAUNCHDARKLY_TOKEN: ${LAUNCHDARKLY_TOKEN:-}
+      JIRA_BASE_URL: ${JIRA_BASE_URL:-}
+      JIRA_TOKEN: ${JIRA_TOKEN:-}
+    volumes:
+      - argus-data:/data
+      - ./config/teams:/app/config/teams:ro
+    depends_on:
+      ollama:
+        condition: service_started
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: argus-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+
+  ollama-pull-model:
+    image: ollama/ollama:latest
+    container_name: argus-ollama-pull-model
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: [ "/bin/sh", "-c", "echo 'Pulling ${OLLAMA_MODEL:-gpt-oss:20b}...' && ollama pull ${OLLAMA_MODEL:-gpt-oss:20b} && echo 'Model ${OLLAMA_MODEL:-gpt-oss:20b} ready.'" ]
+    depends_on:
+      ollama:
+        condition: service_started
+    restart: "no"
+
+volumes:
+  argus-data:
+  ollama-models:

@@ -1,0 +1,11 @@
+.gradle/
+.kotlin/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+.idea/
+*.iml
+*.db
+.DS_Store
+.env
+app/docs/
+.swagger-codegen/

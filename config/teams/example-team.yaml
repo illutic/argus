@@ -1,0 +1,9 @@
+teamId: example-team
+jiraPrefix: EX
+slackChannelId: C0000000000
+repoLayers:
+  - backend
+  - mobile
+telemetry:
+  - humio
+  - sentry
