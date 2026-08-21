@@ -3,7 +3,6 @@ package com.argus.infra.config
 import io.ktor.server.config.*
 
 internal data class AppConfig(
-    val dbPath: String,
     val ollamaHost: String,
     val ollamaModel: String,
     val slackBotToken: String,
@@ -15,7 +14,6 @@ internal data class AppConfig(
     companion object {
         fun fromConfig(config: ApplicationConfig): AppConfig =
             AppConfig(
-                dbPath = config.propertyOrNull("database.path")?.getString() ?: "argus.db",
                 ollamaHost = config.propertyOrNull("ollama.host")?.getString() ?: "http://localhost:11434",
                 ollamaModel = config.propertyOrNull("ollama.model")?.getString() ?: "gpt-oss:20b",
                 slackBotToken = config.propertyOrNull("slack.botToken")?.getString() ?: "",

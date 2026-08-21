@@ -88,7 +88,7 @@ argus/
 ├── app/                             # Application runtime & server composition
 │   └── src/main/kotlin/com/argus/app/
 │       ├── Application.kt           # main(), module(), Ktor plugins, routing bootstrap
-│       ├── config/                  # AppConfig (HOCON), TeamYamlLoader, SQLite/Exposed schema & sync
+│       ├── config/                  # AppConfig (HOCON), TeamYamlLoader, TeamRepository, TeamConfigSync
 │       ├── routes/                  # HealthRoute (GET /health)
 │       └── di/                      # AppModule.kt (aggregates Ingestion, Enrichment, Analysis, Alert modules)
 │

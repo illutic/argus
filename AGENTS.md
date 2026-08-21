@@ -18,10 +18,10 @@ contributor, human or AI agent.
 
 - `gradle/libs.versions.toml` is the sole source of truth for library coordinates and plugin versions. Never hardcode a
   version string in a module `build.gradle.kts`.
-- Runtime config (ports, DB paths, Ollama host, Slack tokens, poll intervals, timeouts) lives in `application.conf`,
+- Runtime config (ports, Ollama host, Slack tokens, poll intervals, timeouts) lives in `application.conf`,
   parsed once at startup into a typed `AppConfig` data class, with env-var substitution (`${?VAR}`) for every secret or
   host.
-- Team routing/provider config lives in `config/teams/*.yaml` and is synced into SQLite as the runtime source of truth —
+- Team routing/provider config lives in `config/teams/*.yaml` and is synced into an in-memory `TeamRepository` as the runtime source of truth —
   never re-parsed ad hoc.
 - Business states (alert severity, incident status, provider health) use typed `enum class`, never string/magic-number
   comparisons.
@@ -33,14 +33,14 @@ contributor, human or AI agent.
                        NO DB/HTTP/framework deps.
 :feature:ingestion  -> Webhooks, Slack slash commands, normalization into RawAlert.
                        Depends ONLY on :domain.
-:feature:enrichment -> Telemetry providers (Humio, Sentry, Firebase), CI/CD (GitHub),
-                       feature flags (LaunchDarkly), issues (Jira), AlertEnricher.
+:feature:enrichment -> Diagnostic context providers (Humio, Sentry, Firebase, GitHub,
+                       LaunchDarkly, Jira), AlertEnricher.
                        Depends ONLY on :domain.
 :feature:analysis   -> Rule heuristics, incident windowing, LLM triage (Ollama).
                        Depends ONLY on :domain.
 :feature:alert      -> Outbound sinks (Slack Block Kit, Jira, PagerDuty).
                        Depends ONLY on :domain.
-:app                -> Ktor server, Netty, HOCON config, SQLite/Exposed persistence,
+:app                -> Ktor server, Netty, HOCON config, in-memory TeamRepository,
                        Koin composition root. Depends on :domain and all feature modules.
 :test-fixtures      -> Reusable in-memory fakes and test utilities.
                        Shared across module test suites.

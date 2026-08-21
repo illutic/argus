@@ -23,7 +23,7 @@ fun main() {
 
 fun Application.module(koinModules: List<Module> = emptyList()) {
     val appConfig = AppConfig.fromConfig(environment.config)
-    log.info("loaded config: dbPath={} ollamaHost={}", appConfig.dbPath, appConfig.ollamaHost)
+    log.info("loaded config: ollamaHost={} ollamaModel={}", appConfig.ollamaHost, appConfig.ollamaModel)
 
     GlobalContext.getOrNull()?.let { GlobalContext.stopKoin() }
     install(Koin) {

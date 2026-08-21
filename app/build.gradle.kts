@@ -12,9 +12,8 @@ dependencies {
     implementation(projects.feature.enrichment)
     implementation(projects.feature.analysis)
     implementation(projects.feature.alert)
-    implementation(libs.bundles.exposed)
-    implementation(libs.sqlite.jdbc)
     implementation(libs.bundles.ktor.client)
+    implementation(libs.kaml)
 
     testImplementation(projects.testFixtures)
 }

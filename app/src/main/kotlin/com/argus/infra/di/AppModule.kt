@@ -4,6 +4,10 @@ import com.argus.alert.di.alertSlackModule
 import com.argus.alert.di.consoleAlertModule
 import com.argus.analysis.di.analysisModule
 import com.argus.analysis.di.consoleAnalysisModule
+import com.argus.config.InMemoryTeamRepository
+import com.argus.config.TeamConfigSync
+import com.argus.config.TeamRepository
+import com.argus.config.TeamYamlLoader
 import com.argus.enrichment.di.consoleEnrichmentModule
 import com.argus.enrichment.di.enrichmentModule
 import com.argus.infra.config.AppConfig
@@ -22,6 +26,9 @@ internal fun appModules(appConfig: AppConfig): List<Module> {
         module {
             single { appConfig }
             single { HttpClient(CIO) }
+            single<TeamRepository> { InMemoryTeamRepository() }
+            single { TeamYamlLoader() }
+            single { TeamConfigSync(get(), get()) }
         }
 
     return listOf(
@@ -51,6 +58,9 @@ internal fun localAppModules(appConfig: AppConfig): List<Module> {
         module {
             single { appConfig }
             single { HttpClient(CIO) }
+            single<TeamRepository> { InMemoryTeamRepository() }
+            single { TeamYamlLoader() }
+            single { TeamConfigSync(emptyList(), get()) }
         }
 
     return listOf(
