@@ -1,8 +1,9 @@
 package com.argus.infra.plugins
 
-import io.ktor.server.application.*
-import io.ktor.server.metrics.micrometer.*
-import io.ktor.server.plugins.calllogging.*
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.metrics.micrometer.MicrometerMetrics
+import io.ktor.server.plugins.calllogging.CallLogging
 import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics

@@ -1,9 +1,10 @@
 package com.argus.infra.plugins
 
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.response.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.response.respond
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("com.argus.infra.plugins.StatusPages")

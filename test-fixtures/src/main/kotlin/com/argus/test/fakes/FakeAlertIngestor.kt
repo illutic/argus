@@ -3,7 +3,7 @@ package com.argus.test.fakes
 import com.argus.domain.model.RawAlert
 import com.argus.ingestion.service.AlertIngestor
 import com.argus.ingestion.service.IngestResult
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 
 class FakeAlertIngestor(

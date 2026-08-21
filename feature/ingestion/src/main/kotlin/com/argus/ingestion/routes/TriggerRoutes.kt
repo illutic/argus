@@ -5,10 +5,11 @@ import com.argus.ingestion.model.IngestionResponse
 import com.argus.ingestion.model.SlackTriggerRequest
 import com.argus.ingestion.service.AlertIngestor
 import com.argus.ingestion.service.IngestResult
-import io.ktor.http.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.post
 import org.koin.ktor.ext.inject
 
 /**

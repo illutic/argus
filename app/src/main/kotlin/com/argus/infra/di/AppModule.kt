@@ -13,8 +13,8 @@ import com.argus.enrichment.di.enrichmentModule
 import com.argus.infra.config.AppConfig
 import com.argus.ingestion.di.consoleIngestionModule
 import com.argus.ingestion.di.ingestionModule
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
 import org.koin.core.module.Module
 import org.koin.dsl.module
 

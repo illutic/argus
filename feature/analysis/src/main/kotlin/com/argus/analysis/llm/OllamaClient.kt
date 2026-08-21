@@ -1,7 +1,7 @@
 package com.argus.analysis.llm
 
 import com.argus.domain.model.LlmResult
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 
 internal class OllamaClient(
     val host: String = "http://localhost:11434",

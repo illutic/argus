@@ -1,6 +1,6 @@
 package com.argus.infra.config
 
-import io.ktor.server.config.*
+import io.ktor.server.config.ApplicationConfig
 
 internal data class AppConfig(
     val ollamaHost: String,

@@ -4,7 +4,7 @@ import com.argus.domain.model.AlertContext
 import com.argus.domain.model.ProviderKey
 import com.argus.domain.model.RawAlert
 import com.argus.domain.model.TeamConfig
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 
 internal class GitHubContextProvider(
     private val token: String = "",

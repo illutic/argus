@@ -4,7 +4,7 @@ import com.argus.domain.model.RawAlert
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import java.util.*
+import java.util.UUID
 
 /**
  * Strategy interface for parsing incoming third-party payload payloads into canonical [RawAlert] format.

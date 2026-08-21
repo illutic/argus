@@ -3,7 +3,7 @@ package com.argus.ingestion.service
 import com.argus.domain.model.RawAlert
 import com.argus.ingestion.queue.AlertQueue
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 internal class DefaultAlertIngestor(
     private val alertQueue: AlertQueue,

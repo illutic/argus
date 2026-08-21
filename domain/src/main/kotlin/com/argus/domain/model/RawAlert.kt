@@ -3,7 +3,7 @@ package com.argus.domain.model
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import java.util.*
+import java.util.UUID
 
 /**
  * Normalized domain representation of an incoming alert trigger from an external source.

@@ -2,7 +2,7 @@ package com.argus.ingestion.service
 
 import com.argus.domain.model.RawAlert
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 internal class ConsoleLoggingAlertIngestor : AlertIngestor {
     private val logger = LoggerFactory.getLogger(ConsoleLoggingAlertIngestor::class.java)
