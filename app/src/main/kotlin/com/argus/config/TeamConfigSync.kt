@@ -33,8 +33,14 @@ internal class TeamConfigSync(
     private val logger = LoggerFactory.getLogger(TeamConfigSync::class.java)
 
     fun sync(teamConfig: TeamConfig): TeamConfigSyncResult {
-        val registeredKeys = contextProviders.map { it.key.name.lowercase().replace("_", "") }.toSet() +
-            contextProviders.map { it.key.name.lowercase() }.toSet()
+        val registeredKeys =
+            contextProviders
+                .map {
+                    it.key.name
+                        .lowercase()
+                        .replace("_", "")
+                }.toSet() +
+                contextProviders.map { it.key.name.lowercase() }.toSet()
 
         for (provider in teamConfig.telemetry) {
             val normalized = provider.lowercase().replace("-", "").replace("_", "")
@@ -51,17 +57,25 @@ internal class TeamConfigSync(
         return TeamConfigSyncResult.Synced(teamConfig.teamId)
     }
 
-    fun syncDirectory(directory: File, loader: TeamYamlLoader = TeamYamlLoader()): List<TeamConfigSyncResult> {
+    fun syncDirectory(
+        directory: File,
+        loader: TeamYamlLoader = TeamYamlLoader(),
+    ): List<TeamConfigSyncResult> {
         if (!directory.exists() || !directory.isDirectory) {
             return emptyList()
         }
-        val yamlFiles = directory.listFiles { file ->
-            file.isFile && (file.extension == "yaml" || file.extension == "yml") && !file.name.endsWith(".disabled")
-        }.orEmpty()
+        val yamlFiles =
+            directory
+                .listFiles { file ->
+                    file.isFile && (file.extension == "yaml" || file.extension == "yml")
+                }.orEmpty()
 
         return yamlFiles.map { file ->
             when (val loadResult = loader.load(file)) {
-                is TeamYamlLoadResult.Success -> sync(loadResult.teamConfig)
+                is TeamYamlLoadResult.Success -> {
+                    sync(loadResult.teamConfig)
+                }
+
                 is TeamYamlLoadResult.Failure -> {
                     logger.warn("Skipping invalid team YAML {}: {}", file.path, loadResult.message)
                     TeamConfigSyncResult.LoadFailure(file.path, loadResult.message)
