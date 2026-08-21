@@ -6,23 +6,24 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class AlertNormalizerTest {
-
     @Test
     fun `normalizes json payload into structured raw alert`() {
         val normalizer = DefaultAlertNormalizer()
-        val jsonPayload = """
+        val jsonPayload =
+            """
             {
                 "title": "Database connection pool exhausted",
                 "source": "humio",
                 "details": "Pool size 50 reached maximum"
             }
-        """.trimIndent()
+            """.trimIndent()
 
-        val alert = normalizer.normalize(
-            teamId = "infra-team",
-            defaultSource = "humio",
-            rawPayload = jsonPayload,
-        )
+        val alert =
+            normalizer.normalize(
+                teamId = "infra-team",
+                defaultSource = "humio",
+                rawPayload = jsonPayload,
+            )
 
         assertEquals("infra-team", alert.teamId)
         assertEquals("humio", alert.source)
@@ -35,11 +36,12 @@ class AlertNormalizerTest {
         val normalizer = DefaultAlertNormalizer()
         val rawText = "Fatal memory error in node-cluster-3"
 
-        val alert = normalizer.normalize(
-            teamId = "infra-team",
-            defaultSource = "syslog",
-            rawPayload = rawText,
-        )
+        val alert =
+            normalizer.normalize(
+                teamId = "infra-team",
+                defaultSource = "syslog",
+                rawPayload = rawText,
+            )
 
         assertEquals("infra-team", alert.teamId)
         assertEquals("syslog", alert.source)
@@ -51,11 +53,12 @@ class AlertNormalizerTest {
     fun `handles blank payload gracefully with default title`() {
         val normalizer = DefaultAlertNormalizer()
 
-        val alert = normalizer.normalize(
-            teamId = "infra-team",
-            defaultSource = "generic",
-            rawPayload = "   ",
-        )
+        val alert =
+            normalizer.normalize(
+                teamId = "infra-team",
+                defaultSource = "generic",
+                rawPayload = "   ",
+            )
 
         assertEquals("infra-team", alert.teamId)
         assertEquals("generic", alert.source)

@@ -8,7 +8,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TeamYamlLoaderTest {
-
     @TempDir
     lateinit var tempDir: Path
 
@@ -16,21 +15,22 @@ class TeamYamlLoaderTest {
 
     @Test
     fun `loads and parses valid team YAML file`() {
-        val file = tempDir.resolve("payments.yaml").toFile().apply {
-            writeText(
-                """
-                teamId: payments
-                jiraPrefix: PAY
-                slackChannelId: C12345678
-                repoLayers:
-                  - services/checkout
-                  - services/billing
-                telemetry:
-                  - sentry
-                  - humio
-                """.trimIndent(),
-            )
-        }
+        val file =
+            tempDir.resolve("payments.yaml").toFile().apply {
+                writeText(
+                    """
+                    teamId: payments
+                    jiraPrefix: PAY
+                    slackChannelId: C12345678
+                    repoLayers:
+                      - services/checkout
+                      - services/billing
+                    telemetry:
+                      - sentry
+                      - humio
+                    """.trimIndent(),
+                )
+            }
 
         val result = loader.load(file)
 
@@ -45,15 +45,16 @@ class TeamYamlLoaderTest {
 
     @Test
     fun `loads valid YAML with optional list fields omitted`() {
-        val file = tempDir.resolve("minimal.yaml").toFile().apply {
-            writeText(
-                """
-                teamId: core
-                jiraPrefix: CORE
-                slackChannelId: C88888888
-                """.trimIndent(),
-            )
-        }
+        val file =
+            tempDir.resolve("minimal.yaml").toFile().apply {
+                writeText(
+                    """
+                    teamId: core
+                    jiraPrefix: CORE
+                    slackChannelId: C88888888
+                    """.trimIndent(),
+                )
+            }
 
         val result = loader.load(file)
 
@@ -79,14 +80,15 @@ class TeamYamlLoaderTest {
 
     @Test
     fun `returns Failure when YAML syntax is malformed`() {
-        val file = tempDir.resolve("malformed.yaml").toFile().apply {
-            writeText(
-                """
-                teamId: payments
-                jiraPrefix: [unclosed list
-                """.trimIndent(),
-            )
-        }
+        val file =
+            tempDir.resolve("malformed.yaml").toFile().apply {
+                writeText(
+                    """
+                    teamId: payments
+                    jiraPrefix: [unclosed list
+                    """.trimIndent(),
+                )
+            }
 
         val result = loader.load(file)
 
@@ -96,14 +98,15 @@ class TeamYamlLoaderTest {
 
     @Test
     fun `returns Failure when required fields are missing`() {
-        val file = tempDir.resolve("missing_fields.yaml").toFile().apply {
-            writeText(
-                """
-                repoLayers:
-                  - backend
-                """.trimIndent(),
-            )
-        }
+        val file =
+            tempDir.resolve("missing_fields.yaml").toFile().apply {
+                writeText(
+                    """
+                    repoLayers:
+                      - backend
+                    """.trimIndent(),
+                )
+            }
 
         val result = loader.load(file)
 

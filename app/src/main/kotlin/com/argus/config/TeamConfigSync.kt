@@ -46,7 +46,8 @@ internal class TeamConfigSync(
             val normalized = provider.lowercase().replace("-", "").replace("_", "")
             val isKnown = registeredKeys.any { it.replace("-", "").replace("_", "") == normalized }
             if (!isKnown) {
-                val errorMsg = "Unregistered telemetry provider '$provider' for team '${teamConfig.teamId}'. Skipping sync for this team."
+                val errorMsg =
+                    "Unregistered telemetry provider '$provider' for team '${teamConfig.teamId}'. Skipping sync for this team."
                 logger.warn(errorMsg)
                 return TeamConfigSyncResult.UnregisteredProvider(teamConfig.teamId, provider)
             }

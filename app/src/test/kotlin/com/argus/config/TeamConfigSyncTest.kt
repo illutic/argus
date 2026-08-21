@@ -14,19 +14,19 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class TeamConfigSyncTest {
-
     @TempDir
     lateinit var tempDir: Path
 
     private lateinit var teamRepository: TeamRepository
-    private val providers: List<ContextProvider> = listOf(
-        FakeContextProvider(ProviderKey.HUMIO),
-        FakeContextProvider(ProviderKey.SENTRY),
-        FakeContextProvider(ProviderKey.FIREBASE),
-        FakeContextProvider(ProviderKey.GITHUB),
-        FakeContextProvider(ProviderKey.LAUNCH_DARKLY),
-        FakeContextProvider(ProviderKey.JIRA),
-    )
+    private val providers: List<ContextProvider> =
+        listOf(
+            FakeContextProvider(ProviderKey.HUMIO),
+            FakeContextProvider(ProviderKey.SENTRY),
+            FakeContextProvider(ProviderKey.FIREBASE),
+            FakeContextProvider(ProviderKey.GITHUB),
+            FakeContextProvider(ProviderKey.LAUNCH_DARKLY),
+            FakeContextProvider(ProviderKey.JIRA),
+        )
 
     @BeforeTest
     fun setup() {
@@ -36,12 +36,13 @@ class TeamConfigSyncTest {
     @Test
     fun `syncs valid team config and stores in memory repository`() {
         val sync = TeamConfigSync(providers, teamRepository)
-        val config = TeamConfig(
-            teamId = "payments",
-            jiraPrefix = "PAY",
-            slackChannelId = "C12345",
-            telemetry = listOf("sentry", "humio"),
-        )
+        val config =
+            TeamConfig(
+                teamId = "payments",
+                jiraPrefix = "PAY",
+                slackChannelId = "C12345",
+                telemetry = listOf("sentry", "humio"),
+            )
 
         val result = sync.sync(config)
 
@@ -58,12 +59,13 @@ class TeamConfigSyncTest {
     @Test
     fun `sync does not throw on unregistered telemetry provider key and returns UnregisteredProvider result`() {
         val sync = TeamConfigSync(providers, teamRepository)
-        val config = TeamConfig(
-            teamId = "bad-team",
-            jiraPrefix = "BAD",
-            slackChannelId = "C99999",
-            telemetry = listOf("unregistered-telemetry-key"),
-        )
+        val config =
+            TeamConfig(
+                teamId = "bad-team",
+                jiraPrefix = "BAD",
+                slackChannelId = "C99999",
+                telemetry = listOf("unregistered-telemetry-key"),
+            )
 
         val result = sync.sync(config)
 

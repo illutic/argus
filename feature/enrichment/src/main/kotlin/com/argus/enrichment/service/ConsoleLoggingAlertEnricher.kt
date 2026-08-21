@@ -24,12 +24,13 @@ internal class ConsoleLoggingAlertEnricher : AlertEnricher {
 
         return EnrichedAlertContext(
             alert = alert,
-            contexts = listOf(
-                AlertContext(providerKey = ProviderKey.HUMIO, items = listOf("${alert.source}.latency_ms: 120.0")),
-                AlertContext(providerKey = ProviderKey.GITHUB, items = listOf("mock-commit: update dependencies")),
-                AlertContext(providerKey = ProviderKey.LAUNCH_DARKLY, items = listOf("mock-flag: true")),
-                AlertContext(providerKey = ProviderKey.JIRA, items = listOf("${teamConfig.jiraPrefix}-101")),
-            ),
+            contexts =
+                listOf(
+                    AlertContext(providerKey = ProviderKey.HUMIO, items = listOf("${alert.source}.latency_ms: 120.0")),
+                    AlertContext(providerKey = ProviderKey.GITHUB, items = listOf("mock-commit: update dependencies")),
+                    AlertContext(providerKey = ProviderKey.LAUNCH_DARKLY, items = listOf("mock-flag: true")),
+                    AlertContext(providerKey = ProviderKey.JIRA, items = listOf("${teamConfig.jiraPrefix}-101")),
+                ),
             providerErrors = emptyList(),
         )
     }

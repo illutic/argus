@@ -4,7 +4,7 @@ import com.argus.domain.model.AlertContext
 import com.argus.domain.model.ProviderKey
 import com.argus.domain.model.RawAlert
 import com.argus.domain.model.TeamConfig
-import io.ktor.client.HttpClient
+import io.ktor.client.*
 
 internal class JiraContextProvider(
     private val baseUrl: String = "",
@@ -13,7 +13,8 @@ internal class JiraContextProvider(
 ) : ContextProvider {
     override val key: ProviderKey = ProviderKey.JIRA
 
-    override suspend fun fetchContext(alert: RawAlert, teamConfig: TeamConfig): Result<AlertContext> {
-        return Result.success(AlertContext(providerKey = key, items = emptyList()))
-    }
+    override suspend fun fetchContext(
+        alert: RawAlert,
+        teamConfig: TeamConfig,
+    ): Result<AlertContext> = Result.success(AlertContext(providerKey = key, items = emptyList()))
 }

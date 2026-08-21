@@ -10,6 +10,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
  */
 interface AlertQueue {
     suspend fun enqueue(alert: RawAlert): Boolean
+
     val alerts: ReceiveChannel<RawAlert>
 }
 
@@ -19,17 +20,17 @@ interface AlertQueue {
 internal class ChannelAlertQueue(
     capacity: Int = 100,
 ) : AlertQueue {
-    private val channel: Channel<RawAlert> = Channel(
-        capacity = capacity,
-        onBufferOverflow = BufferOverflow.SUSPEND,
-    )
+    private val channel: Channel<RawAlert> =
+        Channel(
+            capacity = capacity,
+            onBufferOverflow = BufferOverflow.SUSPEND,
+        )
 
-    override suspend fun enqueue(alert: RawAlert): Boolean {
-        return runCatching {
+    override suspend fun enqueue(alert: RawAlert): Boolean =
+        runCatching {
             channel.send(alert)
             true
         }.getOrDefault(false)
-    }
 
     override val alerts: ReceiveChannel<RawAlert>
         get() = channel

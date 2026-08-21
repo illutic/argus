@@ -3,7 +3,7 @@ package com.argus.ingestion.service
 import com.argus.domain.model.RawAlert
 import com.argus.ingestion.queue.AlertQueue
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 
 internal class DefaultAlertIngestor(
     private val alertQueue: AlertQueue,
@@ -20,13 +20,19 @@ internal class DefaultAlertIngestor(
             return IngestResult.Rejected("title cannot be blank")
         }
 
-        val alertToQueue = if (alert.id.isBlank()) {
-            alert.copy(id = UUID.randomUUID().toString())
-        } else {
-            alert
-        }
+        val alertToQueue =
+            if (alert.id.isBlank()) {
+                alert.copy(id = UUID.randomUUID().toString())
+            } else {
+                alert
+            }
 
-        logger.info("Ingesting webhook alert: id={}, teamId={}, source={}", alertToQueue.id, alertToQueue.teamId, alertToQueue.source)
+        logger.info(
+            "Ingesting webhook alert: id={}, teamId={}, source={}",
+            alertToQueue.id,
+            alertToQueue.teamId,
+            alertToQueue.source,
+        )
         val enqueued = alertQueue.enqueue(alertToQueue)
 
         return if (enqueued) {
@@ -53,13 +59,14 @@ internal class DefaultAlertIngestor(
 
         val alertId = UUID.randomUUID().toString()
         val title = "$command ${text.orEmpty()}".trim()
-        val alert = RawAlert(
-            id = alertId,
-            teamId = teamId,
-            source = "slack",
-            title = title,
-            payload = text.orEmpty(),
-        )
+        val alert =
+            RawAlert(
+                id = alertId,
+                teamId = teamId,
+                source = "slack",
+                title = title,
+                payload = text.orEmpty(),
+            )
 
         logger.info("Ingesting Slack trigger: id={}, teamId={}, command={}", alertId, teamId, command)
         val enqueued = alertQueue.enqueue(alert)

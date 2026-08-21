@@ -8,9 +8,13 @@ import java.util.concurrent.ConcurrentHashMap
  */
 interface TeamRepository {
     fun get(teamId: String): TeamConfig?
+
     fun getAll(): List<TeamConfig>
+
     fun save(teamConfig: TeamConfig)
+
     fun saveAll(configs: List<TeamConfig>)
+
     fun clear()
 }
 

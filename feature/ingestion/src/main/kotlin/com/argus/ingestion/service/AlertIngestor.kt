@@ -8,7 +8,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 sealed interface IngestResult {
-
     /**
      * The alert was successfully validated and enqueued for asynchronous triage.
      *
@@ -34,7 +33,6 @@ sealed interface IngestResult {
  * Boundary contract for receiving, normalizing, and enqueuing alert triggers into the triage pipeline.
  */
 interface AlertIngestor {
-
     /**
      * Ingests a structured alert payload received via an external webhook.
      */

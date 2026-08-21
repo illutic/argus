@@ -14,7 +14,10 @@ class FakeContextProvider(
 ) : ContextProvider {
     val recordedAlerts: MutableList<RawAlert> = CopyOnWriteArrayList()
 
-    override suspend fun fetchContext(alert: RawAlert, teamConfig: TeamConfig): Result<AlertContext> {
+    override suspend fun fetchContext(
+        alert: RawAlert,
+        teamConfig: TeamConfig,
+    ): Result<AlertContext> {
         recordedAlerts += alert
         return if (errorToThrow != null) {
             Result.failure(errorToThrow!!)

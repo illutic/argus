@@ -3,14 +3,13 @@ package com.argus.test.fakes
 import com.argus.domain.model.RawAlert
 import com.argus.ingestion.service.AlertIngestor
 import com.argus.ingestion.service.IngestResult
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
 class FakeAlertIngestor(
     private val shouldAccept: Boolean = true,
     private val rejectReason: String = "Test rejection",
 ) : AlertIngestor {
-
     val ingestedAlerts: MutableList<RawAlert> = CopyOnWriteArrayList()
 
     override suspend fun ingestWebhook(alert: RawAlert): IngestResult {
@@ -42,13 +41,14 @@ class FakeAlertIngestor(
         if (command.isBlank()) {
             return IngestResult.Rejected("command cannot be blank")
         }
-        val alert = RawAlert(
-            id = UUID.randomUUID().toString(),
-            teamId = teamId,
-            source = "slack",
-            title = "$command ${text.orEmpty()}".trim(),
-            payload = text.orEmpty(),
-        )
+        val alert =
+            RawAlert(
+                id = UUID.randomUUID().toString(),
+                teamId = teamId,
+                source = "slack",
+                title = "$command ${text.orEmpty()}".trim(),
+                payload = text.orEmpty(),
+            )
         ingestedAlerts.add(alert)
         return IngestResult.Accepted(alert.id)
     }

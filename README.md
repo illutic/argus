@@ -41,11 +41,10 @@ curl localhost:8080/health
 ### API Documentation & Swagger UI
 
 Once the service is running, explore the interactive OpenAPI documentation:
+
 - **Swagger UI**: [http://localhost:8080/swagger](http://localhost:8080/swagger)
 - **OpenAPI UI**: [http://localhost:8080/openapi](http://localhost:8080/openapi)
 - **OpenAPI Specification**: [`docs/openapi.yaml`](docs/openapi.yaml)
-
-
 
 ## How to Use
 

@@ -2,13 +2,9 @@ package com.argus
 
 import com.argus.alert.sink.AlertSink
 import com.argus.test.fakes.FakeAlertSink
-import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
-import io.ktor.server.testing.testApplication
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.server.testing.*
 import org.koin.dsl.module
 import kotlin.test.Test
 import kotlin.test.assertEquals

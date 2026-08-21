@@ -10,5 +10,9 @@ import com.argus.domain.model.TeamConfig
  */
 interface ContextProvider {
     val key: ProviderKey
-    suspend fun fetchContext(alert: RawAlert, teamConfig: TeamConfig): Result<AlertContext>
+
+    suspend fun fetchContext(
+        alert: RawAlert,
+        teamConfig: TeamConfig,
+    ): Result<AlertContext>
 }

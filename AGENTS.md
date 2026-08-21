@@ -7,22 +7,26 @@ contributor, human or AI agent.
 
 ## Specification-First Development & API Documentation
 
-- **Exhaustive Documentation Requirement**: Every public API endpoint, boundary interface, request/response payload, and configuration property must be fully documented:
-  - **OpenAPI Specification**: All HTTP routes, path/query parameters, request bodies, and status codes must be documented in `docs/openapi.yaml` (and kept in sync with `app/src/main/resources/openapi/documentation.yaml` to power Swagger UI at `/swagger`).
-  - **Domain Payloads & Models**: Always use strict Kotlin `@Serializable` data classes with clear KDoc comments for every field and enum variant — **never** `Map<String, Any>`.
-  - **Stop and Ask on Ambiguity**: If an external API's shape or behavior is ambiguous or undocumented, stop and ask for clarification rather than hallucinating a schema.
-- **TODO (Documentation Enforcement)**: Implement an automated verification step (via a Gradle task or integration test in CI) to enforce that all registered Ktor routes and models have corresponding entries in `docs/openapi.yaml`.
-
+- **Exhaustive Documentation Requirement**: Every public API endpoint, boundary interface, request/response payload, and
+  configuration property must be fully documented:
+    - **OpenAPI Specification**: All HTTP routes, path/query parameters, request bodies, and status codes must be
+      documented in `docs/openapi.yaml` (and kept in sync with `app/src/main/resources/openapi/documentation.yaml` to
+      power Swagger UI at `/swagger`).
+    - **Domain Payloads & Models**: Always use strict Kotlin `@Serializable` data classes with clear KDoc comments for
+      every field and enum variant — **never** `Map<String, Any>`.
+    - **Stop and Ask on Ambiguity**: If an external API's shape or behavior is ambiguous or undocumented, stop and ask
+      for clarification rather than hallucinating a schema.
+- **TODO (Documentation Enforcement)**: Implement an automated verification step (via a Gradle task or integration test
+  in CI) to enforce that all registered Ktor routes and models have corresponding entries in `docs/openapi.yaml`.
 
 ## Single Source of Truth / Zero Hardcoding
 
 - `gradle/libs.versions.toml` is the sole source of truth for library coordinates and plugin versions. Never hardcode a
   version string in a module `build.gradle.kts`.
-- Runtime config (ports, Ollama host, Slack tokens, poll intervals, timeouts) lives in `application.conf`,
-  parsed once at startup into a typed `AppConfig` data class, with env-var substitution (`${?VAR}`) for every secret or
-  host.
-- Team routing/provider config lives in `config/teams/*.yaml` and is synced into an in-memory `TeamRepository` as the runtime source of truth —
-  never re-parsed ad hoc.
+- Runtime config (ports, Ollama host, Slack tokens, poll intervals, timeouts) lives in `application.conf`, parsed once
+  at startup into a typed `AppConfig` data class, with env-var substitution (`${?VAR}`) for every secret or host.
+- Team routing/provider config lives in `config/teams/*.yaml` and is synced into an in-memory `TeamRepository` as the
+  runtime source of truth — never re-parsed ad hoc.
 - Business states (alert severity, incident status, provider health) use typed `enum class`, never string/magic-number
   comparisons.
 
@@ -78,7 +82,9 @@ public domain interfaces in `:domain`.
 Every boundary must be strictly abstracted behind an interface:
 
 - **`ingestion`**: `AlertIngestor` (`DefaultAlertIngestor`, `ConsoleLoggingAlertIngestor`)
-- **`enrichment`**: `AlertEnricher` (`DefaultAlertEnricher`, `ConsoleLoggingAlertEnricher`), `ContextProvider` (`GitHubContextProvider`, `LaunchDarklyContextProvider`, `JiraContextProvider`, `HumioContextProvider`, `SentryContextProvider`, `FirebaseContextProvider`)
+- **`enrichment`**: `AlertEnricher` (`DefaultAlertEnricher`, `ConsoleLoggingAlertEnricher`), `ContextProvider`
+  (`GitHubContextProvider`, `LaunchDarklyContextProvider`, `JiraContextProvider`, `HumioContextProvider`,
+  `SentryContextProvider`, `FirebaseContextProvider`)
 - **`analysis`**: `TriageEngine` (`LlmTriageEngine`, `RuleBasedTriageEngine`), `LlmClient` (`OllamaClient`,
   `ConsoleEchoLlmClient`)
 - **`alert`**: `AlertSink` (`SlackAlertSink`, `ConsoleAlertSink`)
@@ -92,10 +98,12 @@ module composition** (`appModules()` vs `localAppModules()`).
 
 Visibility of components must be kept as restricted as possible:
 
-- Default to `internal` or `private` for all implementation classes, helper methods, internal models, and repository functions.
-- Concrete service implementations (e.g. `DefaultAlertIngestor`, `DefaultAlertEnricher`, `LlmTriageEngine`, `SlackAlertSink`, `ConsoleAlertSink`) must be marked `internal`.
-- **Zero explicit `public` modifiers**: In Kotlin, declarations are public by default. Never write the redundant `public` modifier on public interfaces, models, route extensions, or Koin modules.
-
+- Default to `internal` or `private` for all implementation classes, helper methods, internal models, and repository
+  functions.
+- Concrete service implementations (e.g. `DefaultAlertIngestor`, `DefaultAlertEnricher`, `LlmTriageEngine`,
+  `SlackAlertSink`, `ConsoleAlertSink`) must be marked `internal`.
+- **Zero explicit `public` modifiers**: In Kotlin, declarations are public by default. Never write the redundant
+  `public` modifier on public interfaces, models, route extensions, or Koin modules.
 
 ## Gradle Convention Plugins & Version Catalog
 
@@ -116,6 +124,11 @@ Never let an unhandled exception crash a coroutine or request — catch at servi
 with `flowOn(Dispatchers.IO)` for streaming provider responses. Structured SLF4J/Logback logging
 (`logger.info("...", teamId)`) — never `println()`. Stub implementations return an explicit `TODO()`/`NotImplemented`
 result rather than fake data, so nothing silently pretends to work.
+
+## Code Style & Linting (ktlint)
+
+- **Strict ktlint Compliance**: All Kotlin code across all modules must adhere to official Kotlin coding conventions enforced by ktlint.
+- **Formatting Before Commit**: Always run ktlint formatting to ensure clean, consistent indentation, trailing commas where appropriate, single-responsibility line wrapping, and proper import sorting across all files.
 
 ## Testability & Test-First Development (TDD)
 

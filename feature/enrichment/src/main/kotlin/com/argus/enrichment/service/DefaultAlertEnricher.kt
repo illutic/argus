@@ -19,32 +19,34 @@ internal class DefaultAlertEnricher(
     override suspend fun enrich(
         alert: RawAlert,
         teamConfig: TeamConfig,
-    ): EnrichedAlertContext = supervisorScope {
-        logger.info("Enriching alert id={}, teamId={} across {} providers", alert.id, alert.teamId, providers.size)
+    ): EnrichedAlertContext =
+        supervisorScope {
+            logger.info("Enriching alert id={}, teamId={} across {} providers", alert.id, alert.teamId, providers.size)
 
-        val contexts = CopyOnWriteArrayList<AlertContext>()
-        val providerErrors = CopyOnWriteArrayList<String>()
+            val contexts = CopyOnWriteArrayList<AlertContext>()
+            val providerErrors = CopyOnWriteArrayList<String>()
 
-        providers.map { provider ->
-            async {
-                provider.fetchContext(alert, teamConfig)
-                    .onSuccess { context ->
-                        if (context.items.isNotEmpty()) {
-                            contexts.add(context)
-                        }
+            providers
+                .map { provider ->
+                    async {
+                        provider
+                            .fetchContext(alert, teamConfig)
+                            .onSuccess { context ->
+                                if (context.items.isNotEmpty()) {
+                                    contexts.add(context)
+                                }
+                            }.onFailure { ex ->
+                                val errorMsg = "Provider '${provider.key}' failed: ${ex.message}"
+                                logger.warn(errorMsg, ex)
+                                providerErrors.add(errorMsg)
+                            }
                     }
-                    .onFailure { ex ->
-                        val errorMsg = "Provider '${provider.key}' failed: ${ex.message}"
-                        logger.warn(errorMsg, ex)
-                        providerErrors.add(errorMsg)
-                    }
-            }
-        }.awaitAll()
+                }.awaitAll()
 
-        EnrichedAlertContext(
-            alert = alert,
-            contexts = contexts.toList(),
-            providerErrors = providerErrors.toList(),
-        )
-    }
+            EnrichedAlertContext(
+                alert = alert,
+                contexts = contexts.toList(),
+                providerErrors = providerErrors.toList(),
+            )
+        }
 }

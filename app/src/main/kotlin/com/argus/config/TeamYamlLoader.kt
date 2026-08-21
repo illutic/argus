@@ -21,11 +21,13 @@ internal sealed interface TeamYamlLoadResult {
  * Loads and deserializes a team YAML profile under `config/teams` into [TeamConfig].
  */
 internal class TeamYamlLoader(
-    private val yaml: Yaml = Yaml(
-        configuration = YamlConfiguration(
-            strictMode = false,
+    private val yaml: Yaml =
+        Yaml(
+            configuration =
+                YamlConfiguration(
+                    strictMode = false,
+                ),
         ),
-    ),
 ) {
     private val logger = LoggerFactory.getLogger(TeamYamlLoader::class.java)
 
