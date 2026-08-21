@@ -6,18 +6,25 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 internal sealed interface TeamConfigSyncResult {
-    data object Synced : TeamConfigSyncResult
+    data class Synced(
+        val teamId: String,
+    ) : TeamConfigSyncResult
 
     data class UnregisteredProvider(
         val teamId: String,
         val providerKey: String,
     ) : TeamConfigSyncResult
+
+    data class LoadFailure(
+        val path: String,
+        val message: String,
+    ) : TeamConfigSyncResult
 }
 
 /**
  * Validates team configurations against registered [ContextProvider] keys,
- * stores valid team profiles in the in-memory [TeamRepository], and crashes startup on
- * unregistered provider keys per the fail-fast contract.
+ * stores valid team profiles in the in-memory [TeamRepository], and gracefully
+ * records warnings for invalid team YAML profiles without halting execution.
  */
 internal class TeamConfigSync(
     private val contextProviders: List<ContextProvider>,
@@ -33,15 +40,15 @@ internal class TeamConfigSync(
             val normalized = provider.lowercase().replace("-", "").replace("_", "")
             val isKnown = registeredKeys.any { it.replace("-", "").replace("_", "") == normalized }
             if (!isKnown) {
-                val errorMsg = "Unregistered telemetry provider '$provider' for team '${teamConfig.teamId}'"
-                logger.error(errorMsg)
-                error(errorMsg)
+                val errorMsg = "Unregistered telemetry provider '$provider' for team '${teamConfig.teamId}'. Skipping sync for this team."
+                logger.warn(errorMsg)
+                return TeamConfigSyncResult.UnregisteredProvider(teamConfig.teamId, provider)
             }
         }
 
         teamRepository.save(teamConfig)
         logger.info("Successfully synced team config into in-memory repository for teamId={}", teamConfig.teamId)
-        return TeamConfigSyncResult.Synced
+        return TeamConfigSyncResult.Synced(teamConfig.teamId)
     }
 
     fun syncDirectory(directory: File, loader: TeamYamlLoader = TeamYamlLoader()): List<TeamConfigSyncResult> {
@@ -55,7 +62,10 @@ internal class TeamConfigSync(
         return yamlFiles.map { file ->
             when (val loadResult = loader.load(file)) {
                 is TeamYamlLoadResult.Success -> sync(loadResult.teamConfig)
-                is TeamYamlLoadResult.Failure -> error("Failed to load team YAML ${file.path}: ${loadResult.message}")
+                is TeamYamlLoadResult.Failure -> {
+                    logger.warn("Skipping invalid team YAML {}: {}", file.path, loadResult.message)
+                    TeamConfigSyncResult.LoadFailure(file.path, loadResult.message)
+                }
             }
         }
     }

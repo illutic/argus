@@ -9,8 +9,8 @@ import java.nio.file.Path
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class TeamConfigSyncTest {
@@ -45,7 +45,7 @@ class TeamConfigSyncTest {
 
         val result = sync.sync(config)
 
-        assertEquals(TeamConfigSyncResult.Synced, result)
+        assertEquals(TeamConfigSyncResult.Synced("payments"), result)
 
         val stored = teamRepository.get("payments")
         assertNotNull(stored)
@@ -56,7 +56,7 @@ class TeamConfigSyncTest {
     }
 
     @Test
-    fun `sync throws on unregistered telemetry provider key`() {
+    fun `sync does not throw on unregistered telemetry provider key and returns UnregisteredProvider result`() {
         val sync = TeamConfigSync(providers, teamRepository)
         val config = TeamConfig(
             teamId = "bad-team",
@@ -65,13 +65,16 @@ class TeamConfigSyncTest {
             telemetry = listOf("unregistered-telemetry-key"),
         )
 
-        assertFailsWith<IllegalStateException> {
-            sync.sync(config)
-        }
+        val result = sync.sync(config)
+
+        assertTrue(result is TeamConfigSyncResult.UnregisteredProvider)
+        assertEquals("bad-team", result.teamId)
+        assertEquals("unregistered-telemetry-key", result.providerKey)
+        assertNull(teamRepository.get("bad-team"))
     }
 
     @Test
-    fun `syncDirectory syncs all valid yaml files in directory and skips disabled`() {
+    fun `syncDirectory syncs valid yaml files and records failures without throwing`() {
         val sync = TeamConfigSync(providers, teamRepository)
         val loader = TeamYamlLoader()
 
@@ -87,25 +90,34 @@ class TeamConfigSyncTest {
             )
         }
 
-        tempDir.resolve("team2.yaml.disabled").toFile().apply {
+        tempDir.resolve("invalid-team.yaml").toFile().apply {
+            writeText(
+                """
+                teamId: invalid-team
+                jiraPrefix: [malformed
+                """.trimIndent(),
+            )
+        }
+
+        tempDir.resolve("team3.yaml.disabled").toFile().apply {
             writeText(
                 """
                 teamId: disabled-team
                 jiraPrefix: DIS
                 slackChannelId: C22222
-                telemetry:
-                  - unregistered-telemetry
                 """.trimIndent(),
             )
         }
 
         val results = sync.syncDirectory(tempDir.toFile(), loader)
 
-        assertEquals(1, results.size)
-        assertEquals(TeamConfigSyncResult.Synced, results.first())
+        assertEquals(2, results.size)
+        assertTrue(results.any { it is TeamConfigSyncResult.Synced && it.teamId == "core" })
+        assertTrue(results.any { it is TeamConfigSyncResult.LoadFailure })
 
-        val stored = teamRepository.get("core")
-        assertNotNull(stored)
-        assertEquals("core", stored.teamId)
+        val validStored = teamRepository.get("core")
+        assertNotNull(validStored)
+        assertEquals("core", validStored.teamId)
+        assertNull(teamRepository.get("invalid-team"))
     }
 }
