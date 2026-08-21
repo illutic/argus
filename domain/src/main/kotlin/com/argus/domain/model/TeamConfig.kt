@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
  * @property telemetry Registered telemetry provider keys active for this team (e.g. humio, sentry, firebase).
  */
 @Serializable
-public data class TeamConfig(
+data class TeamConfig(
     val teamId: String,
     val jiraPrefix: String,
     val slackChannelId: String,

@@ -10,14 +10,14 @@ import com.argus.ingestion.service.DefaultAlertIngestor
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-public val ingestionModule: Module =
+val ingestionModule: Module =
     module {
         single<AlertQueue> { ChannelAlertQueue() }
         single<AlertNormalizer> { DefaultAlertNormalizer() }
         single<AlertIngestor> { DefaultAlertIngestor(get()) }
     }
 
-public val consoleIngestionModule: Module =
+val consoleIngestionModule: Module =
     module {
         single<AlertQueue> { ChannelAlertQueue() }
         single<AlertNormalizer> { DefaultAlertNormalizer() }

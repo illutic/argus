@@ -22,9 +22,9 @@ import com.argus.enrichment.telemetry.TelemetryRegistry
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-public val enrichmentModule: Module = enrichmentModule()
+val enrichmentModule: Module = enrichmentModule()
 
-public fun enrichmentModule(
+fun enrichmentModule(
     gitHubToken: () -> String = { "" },
     launchDarklyToken: () -> String = { "" },
     jiraBaseUrl: () -> String = { "" },
@@ -48,7 +48,7 @@ public fun enrichmentModule(
         single<AlertEnricher> { DefaultAlertEnricher(get()) }
     }
 
-public val consoleEnrichmentModule: Module =
+val consoleEnrichmentModule: Module =
     module {
         single<TelemetryRegistry> { InMemoryTelemetryRegistry() }
         single<GitHubClient> { GitHubClientImpl() }
@@ -57,7 +57,7 @@ public val consoleEnrichmentModule: Module =
         single<AlertEnricher> { ConsoleLoggingAlertEnricher() }
     }
 
-public fun TelemetryRegistry.registerBuiltInProviders() {
+fun TelemetryRegistry.registerBuiltInProviders() {
     register(HumioProvider.KEY) { HumioProvider() }
     register(FirebaseProvider.KEY) { FirebaseProvider() }
     register(SentryProvider.KEY) { SentryProvider() }

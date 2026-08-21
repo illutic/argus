@@ -15,7 +15,7 @@ import org.koin.ktor.ext.inject
 /**
  * Ingestion routing: handles incoming triggers (webhooks, Slack actions).
  */
-public fun Route.triggerRoutes() {
+fun Route.triggerRoutes() {
     post("/triggers/webhook") {
         val ingestor by call.inject<AlertIngestor>()
         val alert = call.receive<RawAlert>()

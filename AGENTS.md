@@ -89,16 +89,14 @@ Never write `if (env == "local")` or `if (useSlack)` in business logic or handle
 printing alerts to the console vs. sending via Slack) must be swapped exclusively at configuration time via **Koin
 module composition** (`appModules()` vs `localAppModules()`).
 
-### Minimal Visibility by Default (`internal` / `private`)
+### Minimal Visibility by Default (`internal` / `private`) & No Explicit `public`
 
 Visibility of components must be kept as restricted as possible:
 
-- Default to `internal` or `private` for all implementation classes, helper methods, data models, and repository
-  functions.
-- Only domain data contracts, boundary interfaces (e.g. `AlertIngestor`, `AlertEnricher`, `TriageEngine`, `AlertSink`,
-  `TelemetryRegistry`), public Koin modules, and top-level route extensions should be `public`.
-- Concrete service implementations (e.g. `DefaultAlertIngestor`, `DefaultAlertEnricher`, `LlmTriageEngine`,
-  `SlackAlertSink`, `ConsoleAlertSink`, `InMemoryTelemetryRegistry`) must be marked `internal`.
+- Default to `internal` or `private` for all implementation classes, helper methods, internal models, and repository functions.
+- Concrete service implementations (e.g. `DefaultAlertIngestor`, `DefaultAlertEnricher`, `LlmTriageEngine`, `SlackAlertSink`, `ConsoleAlertSink`, `InMemoryTelemetryRegistry`) must be marked `internal`.
+- **Zero explicit `public` modifiers**: In Kotlin, declarations are public by default. Never write the redundant `public` modifier on public interfaces, models, route extensions, or Koin modules.
+
 
 ## Gradle Convention Plugins & Version Catalog
 

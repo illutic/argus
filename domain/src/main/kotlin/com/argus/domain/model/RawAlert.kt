@@ -16,7 +16,7 @@ import java.util.UUID
  * @property receivedAt Timestamp when the alert was ingested.
  */
 @Serializable
-public data class RawAlert(
+data class RawAlert(
     val id: String = UUID.randomUUID().toString(),
     val teamId: String,
     val source: String = "generic",

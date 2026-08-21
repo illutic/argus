@@ -38,13 +38,13 @@ internal data class IngestionAcceptedResponse(
 
 ## 3. Boundary Interfaces & DI Architecture
 
-### Public Interface
+### Boundary Interface
 ```kotlin
 package com.argus.ingestion.service
 
-public interface AlertIngestor {
-    public suspend fun ingestWebhook(alert: RawAlert): String
-    public suspend fun ingestSlack(teamId: String, command: String, text: String?): String
+interface AlertIngestor {
+    suspend fun ingestWebhook(alert: RawAlert): IngestResult
+    suspend fun ingestSlack(teamId: String, command: String, text: String?): IngestResult
 }
 ```
 

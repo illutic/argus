@@ -26,9 +26,9 @@ Every feature specification in `docs/spec/` must follow this standard template:
    - Comprehensive KDoc for every field and variant.
    - Zero loose types (no `Map<String, Any>` or untyped JSON).
 3. **Boundary Interfaces & DI Architecture**:
-   - `public` domain or feature interface definition.
-   - `internal` service and client implementation classes.
-   - Public Koin module bindings (`production` and `local`/`test` variants).
+   - Boundary interfaces and domain models (no explicit `public` keyword — public by default).
+   - `internal` / `private` service and client implementation classes.
+   - Koin module bindings (`production` and `local`/`test` variants).
 4. **Data Flow & Sequence Diagram**:
    - Mermaid diagram illustrating inputs, async operations, concurrent fan-outs, and outbound calls.
 5. **State Matrix (Valid & Invalid States)**:

@@ -8,9 +8,9 @@ import kotlinx.coroutines.channels.ReceiveChannel
 /**
  * Queue boundary allowing asynchronous dispatch of alerts from HTTP intake to background triage workers.
  */
-public interface AlertQueue {
-    public suspend fun enqueue(alert: RawAlert): Boolean
-    public val alerts: ReceiveChannel<RawAlert>
+interface AlertQueue {
+    suspend fun enqueue(alert: RawAlert): Boolean
+    val alerts: ReceiveChannel<RawAlert>
 }
 
 /**

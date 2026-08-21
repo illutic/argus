@@ -34,20 +34,20 @@ enum class AlertSeverity {
 
 ## 3. Boundary Interfaces & DI Architecture
 
-### Public Interfaces
+### Boundary Interfaces
 ```kotlin
 package com.argus.analysis.service
 
-public interface TriageEngine {
-    public suspend fun triage(context: EnrichedAlertContext): AlertDecision
+interface TriageEngine {
+    suspend fun triage(context: EnrichedAlertContext): AlertDecision
 }
 ```
 
 ```kotlin
 package com.argus.analysis.llm
 
-public interface LlmClient {
-    public suspend fun generate(prompt: String): String
+interface LlmClient {
+    suspend fun generate(prompt: String): String
 }
 ```
 

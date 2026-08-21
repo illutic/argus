@@ -9,8 +9,8 @@ import java.util.UUID
 /**
  * Strategy interface for parsing incoming third-party payload payloads into canonical [RawAlert] format.
  */
-public interface AlertNormalizer {
-    public fun normalize(teamId: String, defaultSource: String, rawPayload: String): RawAlert
+interface AlertNormalizer {
+    fun normalize(teamId: String, defaultSource: String, rawPayload: String): RawAlert
 }
 
 internal class DefaultAlertNormalizer(

@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  * @property capturedAt Timestamp of the sample capture.
  */
 @Serializable
-public data class MetricSample(
+data class MetricSample(
     val providerKey: String,
     val teamId: String,
     val name: String,

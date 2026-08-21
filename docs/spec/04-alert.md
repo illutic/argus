@@ -11,9 +11,9 @@ The Alert feature delivers the final `AlertDecision` to designated operational c
 ```kotlin
 package com.argus.alert.sink
 
-public sealed interface AlertDeliveryResult {
-    public data object Delivered : AlertDeliveryResult
-    public data class Failed(val reason: String, val cause: Throwable? = null) : AlertDeliveryResult
+sealed interface AlertDeliveryResult {
+    data object Delivered : AlertDeliveryResult
+    data class Failed(val reason: String, val cause: Throwable? = null) : AlertDeliveryResult
 }
 ```
 
@@ -21,12 +21,12 @@ public sealed interface AlertDeliveryResult {
 
 ## 3. Boundary Interfaces & DI Architecture
 
-### Public Interface
+### Boundary Interface
 ```kotlin
 package com.argus.alert.sink
 
-public interface AlertSink {
-    public suspend fun deliver(decision: AlertDecision): AlertDeliveryResult
+interface AlertSink {
+    suspend fun deliver(decision: AlertDecision): AlertDeliveryResult
 }
 ```
 

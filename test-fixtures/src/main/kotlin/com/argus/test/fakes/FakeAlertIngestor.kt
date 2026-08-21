@@ -6,12 +6,12 @@ import com.argus.ingestion.service.IngestResult
 import java.util.UUID
 import java.util.concurrent.CopyOnWriteArrayList
 
-public class FakeAlertIngestor(
+class FakeAlertIngestor(
     private val shouldAccept: Boolean = true,
     private val rejectReason: String = "Test rejection",
 ) : AlertIngestor {
 
-    public val ingestedAlerts: MutableList<RawAlert> = CopyOnWriteArrayList()
+    val ingestedAlerts: MutableList<RawAlert> = CopyOnWriteArrayList()
 
     override suspend fun ingestWebhook(alert: RawAlert): IngestResult {
         if (!shouldAccept) {

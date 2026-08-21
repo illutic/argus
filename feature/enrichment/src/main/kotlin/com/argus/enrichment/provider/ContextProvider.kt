@@ -7,7 +7,7 @@ import com.argus.domain.model.TeamConfig
 /**
  * Pluggable provider contract for retrieving diagnostic context for an alert.
  */
-public interface ContextProvider {
-    public val key: String
-    public suspend fun fetchContext(alert: RawAlert, teamConfig: TeamConfig): AlertContext
+interface ContextProvider {
+    val key: String
+    suspend fun fetchContext(alert: RawAlert, teamConfig: TeamConfig): AlertContext
 }

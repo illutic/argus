@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
  * @property items Contextual data points, logs, deployment summaries, or issue keys.
  */
 @Serializable
-public data class AlertContext(
+data class AlertContext(
     val providerKey: String,
     val items: List<String> = emptyList(),
 )
@@ -22,7 +22,7 @@ public data class AlertContext(
  * @property providerErrors Warning and error messages from any providers that failed or timed out.
  */
 @Serializable
-public data class EnrichedAlertContext(
+data class EnrichedAlertContext(
     val alert: RawAlert,
     val contexts: List<AlertContext> = emptyList(),
     val providerErrors: List<String> = emptyList(),
