@@ -1,7 +1,7 @@
 package com.argus.enrichment.service
 
+import com.argus.domain.model.AlertContext
 import com.argus.domain.model.EnrichedAlertContext
-import com.argus.domain.model.MetricSample
 import com.argus.domain.model.RawAlert
 import com.argus.domain.model.TeamConfig
 import org.slf4j.LoggerFactory
@@ -23,17 +23,12 @@ internal class ConsoleLoggingAlertEnricher : AlertEnricher {
 
         return EnrichedAlertContext(
             alert = alert,
-            metricSamples = listOf(
-                MetricSample(
-                    providerKey = alert.source,
-                    teamId = alert.teamId,
-                    name = "mock_latency_ms",
-                    value = 120.0,
-                ),
+            contexts = listOf(
+                AlertContext(providerKey = "telemetry", items = listOf("${alert.source}.latency_ms: 120.0")),
+                AlertContext(providerKey = "github", items = listOf("mock-commit: update dependencies")),
+                AlertContext(providerKey = "launchdarkly", items = listOf("mock-flag: true")),
+                AlertContext(providerKey = "jira", items = listOf("${teamConfig.jiraPrefix}-101")),
             ),
-            recentDeployments = listOf("mock-commit: update dependencies"),
-            activeFeatureFlags = listOf("mock-flag: true"),
-            relatedJiraTickets = listOf("${teamConfig.jiraPrefix}-101"),
             providerErrors = emptyList(),
         )
     }

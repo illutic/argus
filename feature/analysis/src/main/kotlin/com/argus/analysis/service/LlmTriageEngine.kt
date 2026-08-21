@@ -22,7 +22,7 @@ internal class LlmTriageEngine(
             teamId = context.alert.teamId,
             severity = AlertSeverity.WARNING,
             summary = summary,
-            sourceSampleCount = context.metricSamples.size,
+            sourceSampleCount = context.contexts.sumOf { it.items.size },
         )
     }
 }

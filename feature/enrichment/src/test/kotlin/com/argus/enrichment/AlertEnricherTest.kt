@@ -1,14 +1,20 @@
 package com.argus.enrichment
 
-import com.argus.domain.model.MetricSample
+import com.argus.domain.model.AlertContext
 import com.argus.domain.model.RawAlert
 import com.argus.domain.model.TeamConfig
-import com.argus.enrichment.integrations.github.GitHubQueryResult
-import com.argus.enrichment.integrations.jira.JiraSearchResult
-import com.argus.enrichment.integrations.launchdarkly.FlagLookupResult
+import com.argus.enrichment.provider.ContextProvider
+import com.argus.enrichment.provider.GitHubContextProvider
+import com.argus.enrichment.provider.JiraContextProvider
+import com.argus.enrichment.provider.LaunchDarklyContextProvider
+import com.argus.enrichment.provider.TelemetryContextProvider
 import com.argus.enrichment.service.DefaultAlertEnricher
 import com.argus.enrichment.telemetry.TelemetryFetchResult
 import com.argus.enrichment.telemetry.TelemetryProvider
+import com.argus.domain.model.MetricSample
+import com.argus.enrichment.integrations.github.GitHubQueryResult
+import com.argus.enrichment.integrations.jira.JiraSearchResult
+import com.argus.enrichment.integrations.launchdarkly.FlagLookupResult
 import com.argus.test.fakes.FakeGitHubClient
 import com.argus.test.fakes.FakeJiraClient
 import com.argus.test.fakes.FakeLaunchDarklyClient
@@ -41,7 +47,7 @@ class AlertEnricherTest {
     )
 
     @Test
-    fun `enrich aggregates complete context across telemetry, github, launchdarkly, and jira`() = runBlocking {
+    fun `enrich aggregates provider-agnostic contexts across all registered providers`() = runBlocking {
         val registry = FakeTelemetryRegistry().apply {
             register("sentry") {
                 StubTelemetryProvider(
@@ -62,123 +68,66 @@ class AlertEnricherTest {
         }
 
         val gitHubClient = FakeGitHubClient(
-            result = GitHubQueryResult.Success("commit abc1234 by dev@company.com: update checkout flow"),
+            result = GitHubQueryResult.Success("commit abc1234: update checkout flow"),
         )
         val ldClient = FakeLaunchDarklyClient(
             result = FlagLookupResult.Success(flagKey = "new-checkout-v2", enabled = true),
         )
         val jiraClient = FakeJiraClient(
-            result = JiraSearchResult.Success(listOf("PAY-101: Fix payment timeout", "PAY-102: Upgrade Stripe SDK")),
+            result = JiraSearchResult.Success(listOf("PAY-101: Fix payment timeout")),
         )
 
-        val enricher = DefaultAlertEnricher(registry, gitHubClient, ldClient, jiraClient)
+        val providers: List<ContextProvider> = listOf(
+            TelemetryContextProvider(registry),
+            GitHubContextProvider(gitHubClient),
+            LaunchDarklyContextProvider(ldClient),
+            JiraContextProvider(jiraClient),
+        )
 
+        val enricher = DefaultAlertEnricher(providers)
         val context = enricher.enrich(alert, teamConfig)
 
         assertEquals("payments", context.alert.teamId)
-        assertEquals(2, context.metricSamples.size)
-        assertEquals(1, context.recentDeployments.size)
-        assertTrue(context.recentDeployments.first().contains("abc1234"))
-        assertEquals(1, context.activeFeatureFlags.size)
-        assertTrue(context.activeFeatureFlags.first().contains("new-checkout-v2: true"))
-        assertEquals(2, context.relatedJiraTickets.size)
+        assertEquals(4, context.contexts.size)
         assertTrue(context.providerErrors.isEmpty())
+
+        val telemetryContext = context.contexts.first { it.providerKey == "telemetry" }
+        assertEquals(2, telemetryContext.items.size)
+        assertTrue(telemetryContext.items.any { it.contains("sentry.error_rate: 12.5") })
+
+        val githubContext = context.contexts.first { it.providerKey == "github" }
+        assertTrue(githubContext.items.first().contains("abc1234"))
+
+        val ldContext = context.contexts.first { it.providerKey == "launchdarkly" }
+        assertTrue(ldContext.items.first().contains("new-checkout-v2: true"))
+
+        val jiraContext = context.contexts.first { it.providerKey == "jira" }
+        assertTrue(jiraContext.items.first().contains("PAY-101"))
     }
 
     @Test
-    fun `enrich handles telemetry provider failure gracefully without failing entire pipeline`() = runBlocking {
-        val registry = FakeTelemetryRegistry().apply {
-            register("sentry") {
-                StubTelemetryProvider(
-                    "sentry",
-                    TelemetryFetchResult.Failure("sentry", "HTTP 503 Service Unavailable"),
-                )
-            }
-            register("humio") {
-                StubTelemetryProvider(
-                    "humio",
-                    TelemetryFetchResult.Success(
-                        listOf(MetricSample(providerKey = "humio", teamId = "payments", name = "cpu_usage", value = 92.0)),
-                    ),
-                )
+    fun `enrich handles individual provider failure gracefully without failing entire pipeline`() = runBlocking {
+        val failingProvider = object : ContextProvider {
+            override val key: String = "flakey-provider"
+            override suspend fun fetchContext(alert: RawAlert, teamConfig: TeamConfig): AlertContext {
+                error("Network timeout contacting upstream service")
             }
         }
 
-        val gitHubClient = FakeGitHubClient(GitHubQueryResult.Success("deployment v1.2.3"))
-        val ldClient = FakeLaunchDarklyClient(FlagLookupResult.Success("flag-1", false))
-        val jiraClient = FakeJiraClient(JiraSearchResult.Success(listOf("PAY-55")))
+        val successfulProvider = object : ContextProvider {
+            override val key: String = "reliable-provider"
+            override suspend fun fetchContext(alert: RawAlert, teamConfig: TeamConfig): AlertContext {
+                return AlertContext(providerKey = key, items = listOf("healthy diagnostic data"))
+            }
+        }
 
-        val enricher = DefaultAlertEnricher(registry, gitHubClient, ldClient, jiraClient)
-
+        val enricher = DefaultAlertEnricher(listOf(failingProvider, successfulProvider))
         val context = enricher.enrich(alert, teamConfig)
 
-        assertEquals(1, context.metricSamples.size)
-        assertEquals("humio", context.metricSamples.first().providerKey)
+        assertEquals(1, context.contexts.size)
+        assertEquals("reliable-provider", context.contexts.first().providerKey)
         assertEquals(1, context.providerErrors.size)
-        assertTrue(context.providerErrors.first().contains("sentry: HTTP 503"))
-        assertEquals(1, context.recentDeployments.size)
-        assertEquals(1, context.relatedJiraTickets.size)
-    }
-
-    @Test
-    fun `enrich handles unregistered telemetry provider without crashing`() = runBlocking {
-        val registry = FakeTelemetryRegistry() // neither sentry nor humio registered
-        val gitHubClient = FakeGitHubClient()
-        val ldClient = FakeLaunchDarklyClient()
-        val jiraClient = FakeJiraClient()
-
-        val enricher = DefaultAlertEnricher(registry, gitHubClient, ldClient, jiraClient)
-
-        val context = enricher.enrich(alert, teamConfig)
-
-        assertTrue(context.metricSamples.isEmpty())
-        assertEquals(2, context.providerErrors.size)
-        assertTrue(context.providerErrors.any { it.contains("sentry") })
-        assertTrue(context.providerErrors.any { it.contains("humio") })
-    }
-
-    @Test
-    fun `enrich handles github client failure gracefully`() = runBlocking {
-        val registry = FakeTelemetryRegistry()
-        val gitHubClient = FakeGitHubClient(GitHubQueryResult.Failure("title", "GitHub 401 Unauthorized"))
-        val ldClient = FakeLaunchDarklyClient()
-        val jiraClient = FakeJiraClient()
-
-        val enricher = DefaultAlertEnricher(registry, gitHubClient, ldClient, jiraClient)
-
-        val context = enricher.enrich(alert, teamConfig)
-
-        assertTrue(context.recentDeployments.isEmpty())
-        assertTrue(context.providerErrors.any { it.contains("GitHub") })
-    }
-
-    @Test
-    fun `enrich handles launchdarkly client failure gracefully`() = runBlocking {
-        val registry = FakeTelemetryRegistry()
-        val gitHubClient = FakeGitHubClient()
-        val ldClient = FakeLaunchDarklyClient(FlagLookupResult.Failure("sentry", "Flag not found"))
-        val jiraClient = FakeJiraClient()
-
-        val enricher = DefaultAlertEnricher(registry, gitHubClient, ldClient, jiraClient)
-
-        val context = enricher.enrich(alert, teamConfig)
-
-        assertTrue(context.activeFeatureFlags.isEmpty())
-        assertTrue(context.providerErrors.any { it.contains("LaunchDarkly") })
-    }
-
-    @Test
-    fun `enrich handles jira client failure gracefully`() = runBlocking {
-        val registry = FakeTelemetryRegistry()
-        val gitHubClient = FakeGitHubClient()
-        val ldClient = FakeLaunchDarklyClient()
-        val jiraClient = FakeJiraClient(JiraSearchResult.Failure("PAY", "Jira connection timeout"))
-
-        val enricher = DefaultAlertEnricher(registry, gitHubClient, ldClient, jiraClient)
-
-        val context = enricher.enrich(alert, teamConfig)
-
-        assertTrue(context.relatedJiraTickets.isEmpty())
-        assertTrue(context.providerErrors.any { it.contains("Jira") })
+        assertTrue(context.providerErrors.first().contains("flakey-provider"))
+        assertTrue(context.providerErrors.first().contains("Network timeout"))
     }
 }

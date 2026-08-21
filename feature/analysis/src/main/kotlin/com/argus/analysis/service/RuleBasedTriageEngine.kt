@@ -16,7 +16,7 @@ internal class RuleBasedTriageEngine : TriageEngine {
             teamId = context.alert.teamId,
             severity = severity,
             summary = "Rule-based triage: ${context.alert.title} (Source: ${context.alert.source})",
-            sourceSampleCount = context.metricSamples.size,
+            sourceSampleCount = context.contexts.sumOf { it.items.size },
         )
     }
 }
