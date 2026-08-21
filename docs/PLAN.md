@@ -147,7 +147,7 @@ argus/
 - [x] **Phase 3**: Refactor to feature-based module layout (`:domain`, `:feature:ingestion`, `:feature:enrichment`,
   `:feature:analysis`, `:feature:alert`, `:app`, `:test-fixtures`) with interface-driven abstractions and Koin DI
   swappability.
-- [ ] **Phase 4**: Ingestion normalizers & background triage worker channel.
+- [x] **Phase 4**: Ingestion normalizers & background triage worker channel.
 - [ ] **Phase 5**: Parallel context gatherer (`AlertEnricher`) with concrete telemetry/integration clients.
 - [ ] **Phase 6**: LLM prompt synthesis & heuristic severity evaluation in `:analysis`.
 - [ ] **Phase 7**: Slack Block Kit layout rendering and multi-sink dispatcher in `:alert`.

@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     api(projects.domain)
+    api(projects.feature.ingestion)
     api(projects.feature.enrichment)
     api(projects.feature.analysis)
     api(projects.feature.alert)

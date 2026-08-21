@@ -7,7 +7,9 @@ import com.argus.test.fakes.FakeTelemetryRegistry
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import org.koin.dsl.module
 import kotlin.test.Test
@@ -38,7 +40,22 @@ class RoutesTest {
 
             val response =
                 client.post("/triggers/webhook") {
-                    setBody("""{"teamId":"test-team","title":"High latency"}""")
+                    contentType(ContentType.Application.Json)
+                    setBody("""{"teamId":"test-team","source":"sentry","title":"High latency"}""")
+                }
+
+            assertEquals(HttpStatusCode.Accepted, response.status)
+        }
+
+    @Test
+    fun `slack trigger route accepts alert with 202`() =
+        testApplication {
+            application { module(koinModules = listOf(testModule)) }
+
+            val response =
+                client.post("/triggers/slack") {
+                    contentType(ContentType.Application.Json)
+                    setBody("""{"teamId":"test-team","command":"/triage","text":"checkout failing"}""")
                 }
 
             assertEquals(HttpStatusCode.Accepted, response.status)
