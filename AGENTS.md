@@ -78,8 +78,7 @@ public domain interfaces in `:domain`.
 Every boundary must be strictly abstracted behind an interface:
 
 - **`ingestion`**: `AlertIngestor` (`DefaultAlertIngestor`, `ConsoleLoggingAlertIngestor`)
-- **`enrichment`**: `AlertEnricher` (`DefaultAlertEnricher`, `ConsoleLoggingAlertEnricher`), `TelemetryRegistry`,
-  `GitHubClient`, `LaunchDarklyClient`, `JiraClient`
+- **`enrichment`**: `AlertEnricher` (`DefaultAlertEnricher`, `ConsoleLoggingAlertEnricher`), `ContextProvider` (`GitHubContextProvider`, `LaunchDarklyContextProvider`, `JiraContextProvider`, `HumioContextProvider`, `SentryContextProvider`, `FirebaseContextProvider`)
 - **`analysis`**: `TriageEngine` (`LlmTriageEngine`, `RuleBasedTriageEngine`), `LlmClient` (`OllamaClient`,
   `ConsoleEchoLlmClient`)
 - **`alert`**: `AlertSink` (`SlackAlertSink`, `ConsoleAlertSink`)
@@ -94,7 +93,7 @@ module composition** (`appModules()` vs `localAppModules()`).
 Visibility of components must be kept as restricted as possible:
 
 - Default to `internal` or `private` for all implementation classes, helper methods, internal models, and repository functions.
-- Concrete service implementations (e.g. `DefaultAlertIngestor`, `DefaultAlertEnricher`, `LlmTriageEngine`, `SlackAlertSink`, `ConsoleAlertSink`, `InMemoryTelemetryRegistry`) must be marked `internal`.
+- Concrete service implementations (e.g. `DefaultAlertIngestor`, `DefaultAlertEnricher`, `LlmTriageEngine`, `SlackAlertSink`, `ConsoleAlertSink`) must be marked `internal`.
 - **Zero explicit `public` modifiers**: In Kotlin, declarations are public by default. Never write the redundant `public` modifier on public interfaces, models, route extensions, or Koin modules.
 
 

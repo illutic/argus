@@ -5,12 +5,12 @@ import kotlinx.serialization.Serializable
 /**
  * Diagnostic context provided by an integration or telemetry source.
  *
- * @property providerKey Identifier of the data source (e.g. github, launchdarkly, jira, sentry, humio).
+ * @property providerKey Identifier of the data source.
  * @property items Contextual data points, logs, deployment summaries, or issue keys.
  */
 @Serializable
 data class AlertContext(
-    val providerKey: String,
+    val providerKey: ProviderKey,
     val items: List<String> = emptyList(),
 )
 

@@ -68,7 +68,7 @@ argus/
 │   ├── enrichment/                  # Context aggregation & telemetry integrations
 │   │   └── src/main/kotlin/com/argus/enrichment/
 │   │       ├── telemetry/           # TelemetryRegistry, HumioProvider, SentryProvider, FirebaseProvider
-│   │       ├── integrations/        # GitHubClient, LaunchDarklyClient, JiraClient
+│   │       ├── provider/            # ContextProvider, GitHub/LD/Jira/TelemetryContextProvider
 │   │       ├── service/             # AlertEnricher (concurrent coroutine fan-out)
 │   │       └── di/                  # EnrichmentModule.kt (Koin)
 │   │
@@ -95,8 +95,8 @@ argus/
 └── test-fixtures/                   # Shared test fakes & testing utilities
     └── src/main/kotlin/com/argus/test/fakes/
         ├── FakeTelemetryRegistry.kt
+        ├── FakeContextProvider.kt
         ├── FakeAlertSink.kt
-        ├── FakeGitHubClient.kt
         └── FakeLlmClient.kt
 ```
 

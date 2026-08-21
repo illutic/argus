@@ -2,12 +2,12 @@
 
 ## 1. Overview & Objective
 The Enrichment feature aggregates diagnostic context around an incoming alert across multiple external systems concurrently:
-- **Telemetry Providers**: Logs, exception stacktraces, metric samples (Humio, Sentry, Firebase Crashlytics).
+- **Telemetry Sources**: Humio (logs), Sentry (stacktraces/exceptions), Firebase Crashlytics (crash counts).
 - **CI/CD & Source Code**: Commits, PRs, and deployment tags (GitHub).
 - **Feature Flags**: Modified flags and targeting rules (LaunchDarkly).
 - **Issue Tracking**: Associated bugs and incident tickets (Jira).
 
-All diagnostic data is structured in a **provider-agnostic** representation: each provider produces an `AlertContext` (composed of a `providerKey` and a list of context strings).
+All diagnostic sources implement the unified `ContextProvider` interface, producing a structured `AlertContext` (composed of a `providerKey` and a list of context strings).
 
 ---
 
@@ -36,28 +36,28 @@ data class EnrichedAlertContext(
 
 ## 3. Boundary Interfaces & DI Architecture
 
-### Public Interfaces
+### Boundary Interfaces
 ```kotlin
 package com.argus.enrichment.service
 
-public interface AlertEnricher {
-    public suspend fun enrich(alert: RawAlert, teamConfig: TeamConfig): EnrichedAlertContext
+interface AlertEnricher {
+    suspend fun enrich(alert: RawAlert, teamConfig: TeamConfig): EnrichedAlertContext
 }
 ```
 
 ```kotlin
 package com.argus.enrichment.provider
 
-public interface ContextProvider {
-    public val key: String
-    public suspend fun fetchContext(alert: RawAlert, teamConfig: TeamConfig): AlertContext
+interface ContextProvider {
+    val key: String
+    suspend fun fetchContext(alert: RawAlert, teamConfig: TeamConfig): AlertContext
 }
 ```
 
 ### Implementations (Internal)
 - `DefaultAlertEnricher`: Asynchronously fans out over a `List<ContextProvider>`, collecting `AlertContext`s and catching provider failures into `providerErrors`.
 - `ConsoleLoggingAlertEnricher`: Generates mock diagnostic context for local testing/demo mode.
-- `TelemetryContextProvider`, `GitHubContextProvider`, `LaunchDarklyContextProvider`, `JiraContextProvider`: Concrete adapters implementing `ContextProvider`.
+- `GitHubContextProvider`, `LaunchDarklyContextProvider`, `JiraContextProvider`, `HumioContextProvider`, `SentryContextProvider`, `FirebaseContextProvider`: Concrete providers implementing `ContextProvider`.
 
 ---
 
@@ -67,10 +67,10 @@ public interface ContextProvider {
 flowchart TD
     A["AlertEnricher.enrich(alert, teamConfig)"] --> B["supervisorScope"]
     
-    B --> C["async: ContextProvider(telemetry).fetchContext"]
-    B --> D["async: ContextProvider(github).fetchContext"]
-    B --> E["async: ContextProvider(launchdarkly).fetchContext"]
-    B --> F["async: ContextProvider(jira).fetchContext"]
+    B --> C["async: ContextProvider(github).fetchContext"]
+    B --> D["async: ContextProvider(launchdarkly).fetchContext"]
+    B --> E["async: ContextProvider(jira).fetchContext"]
+    B --> F["async: ContextProvider(humio/sentry).fetchContext"]
     
     C --> G["Await All & Combine Non-Empty Contexts"]
     D --> G
@@ -95,10 +95,6 @@ flowchart TD
 
 ## 6. Test Plan & Fakes
 - **Unit Tests**:
-  - `AlertEnricherTest`: Verifies parallel execution, provider-agnostic aggregation, and isolated error handling.
-  - `InMemoryTelemetryRegistryTest`: Verifies telemetry provider registration and resolution.
+  - `AlertEnricherTest`: Verifies parallel execution, provider-agnostic aggregation, and isolated error handling across `ContextProvider`s.
 - **Fakes in `:test-fixtures`**:
-  - `FakeTelemetryRegistry`
-  - `FakeGitHubClient`
-  - `FakeLaunchDarklyClient`
-  - `FakeJiraClient`
+  - `FakeContextProvider`

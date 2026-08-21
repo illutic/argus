@@ -27,17 +27,17 @@ internal class DefaultAlertEnricher(
 
         providers.map { provider ->
             async {
-                runCatching {
-                    provider.fetchContext(alert, teamConfig)
-                }.onSuccess { context ->
-                    if (context.items.isNotEmpty()) {
-                        contexts.add(context)
+                provider.fetchContext(alert, teamConfig)
+                    .onSuccess { context ->
+                        if (context.items.isNotEmpty()) {
+                            contexts.add(context)
+                        }
                     }
-                }.onFailure { ex ->
-                    val errorMsg = "Provider '${provider.key}' failed: ${ex.message}"
-                    logger.warn(errorMsg, ex)
-                    providerErrors.add(errorMsg)
-                }
+                    .onFailure { ex ->
+                        val errorMsg = "Provider '${provider.key}' failed: ${ex.message}"
+                        logger.warn(errorMsg, ex)
+                        providerErrors.add(errorMsg)
+                    }
             }
         }.awaitAll()
 

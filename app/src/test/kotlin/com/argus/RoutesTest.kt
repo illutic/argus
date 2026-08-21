@@ -1,9 +1,7 @@
 package com.argus
 
 import com.argus.alert.sink.AlertSink
-import com.argus.enrichment.telemetry.TelemetryRegistry
 import com.argus.test.fakes.FakeAlertSink
-import com.argus.test.fakes.FakeTelemetryRegistry
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -19,7 +17,6 @@ import kotlin.test.assertTrue
 class RoutesTest {
     private val testModule =
         module {
-            single<TelemetryRegistry> { FakeTelemetryRegistry() }
             single<AlertSink> { FakeAlertSink() }
         }
 

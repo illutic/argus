@@ -1,12 +1,10 @@
 package com.argus
 
-import com.argus.enrichment.di.registerBuiltInProviders
-import com.argus.enrichment.telemetry.TelemetryRegistry
 import com.argus.infra.config.AppConfig
 import com.argus.infra.di.appModules
 import com.argus.infra.plugins.configureMonitoring
-import com.argus.infra.plugins.configureSerialization
 import com.argus.infra.plugins.configureOpenApi
+import com.argus.infra.plugins.configureSerialization
 import com.argus.infra.plugins.configureStatusPages
 import com.argus.ingestion.routes.triggerRoutes
 import com.argus.routes.healthRoutes
@@ -16,7 +14,6 @@ import io.ktor.server.netty.*
 import io.ktor.server.routing.*
 import org.koin.core.context.GlobalContext
 import org.koin.core.module.Module
-import org.koin.ktor.ext.get
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
 
@@ -33,9 +30,6 @@ fun Application.module(koinModules: List<Module> = emptyList()) {
         slf4jLogger()
         modules(appModules(appConfig) + koinModules)
     }
-
-    val telemetryRegistry: TelemetryRegistry = get()
-    telemetryRegistry.registerBuiltInProviders()
 
     configureSerialization()
     configureStatusPages()
