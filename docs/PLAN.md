@@ -148,7 +148,7 @@ argus/
   `:feature:analysis`, `:feature:alert`, `:app`, `:test-fixtures`) with interface-driven abstractions and Koin DI
   swappability.
 - [x] **Phase 4**: Ingestion normalizers & background triage worker channel.
-- [ ] **Phase 5**: Parallel context gatherer (`AlertEnricher`) with concrete telemetry/integration clients.
+- [x] **Phase 5**: Parallel context gatherer (`AlertEnricher`) with concrete telemetry/integration clients.
 - [ ] **Phase 6**: LLM prompt synthesis & heuristic severity evaluation in `:analysis`.
 - [ ] **Phase 7**: Slack Block Kit layout rendering and multi-sink dispatcher in `:alert`.
 - [ ] **Phase 8 (Tooling & Quality)**: Automated OpenAPI documentation enforcement in CI (verifying route coverage against `docs/openapi.yaml`).
